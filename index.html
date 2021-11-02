@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style type="text/css">
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+        }
+        #container {
+            margin-top: 4%;
+            margin-left: 10%;
+            grid-auto-flow: column;
+            /* width: 80%;
+            height: 80%; */
+            display: grid;
+            grid-template-columns: repeat(54, 10px);
+            grid-gap: 4px;
+            grid-template-rows: repeat(7, 10px)
+        }
+        .item {
+            border: 1px solid rgba(27, 31, 35, 0.06);
+            border-radius: 1px;
+            background-color: rgb(235, 237, 240);
+        }
+        .button-group {
+            margin-left: 10%;
+            margin-top: 2%;
+        }
+        .year-container {
+            margin-left: 10%;
+            padding-top: 10%;
+        }
+        .info {
+            margin-left: 10%;
+            margin-top: 2%;
+        }
+    </style>
+</head>
+<body>
+    <div class="year-container">
+        年份: <input type="text" id="year" value='2021'/>
+        <button type="button" class='button' id="confirm">Confirm</button>
+    </div>
+
+    <div id="container">
+    </div>
+    <div id="info" class='info'>日期</div>
+
+    <div class="button-group">
+        <button type="button" class='button' id="result">GET RESULTS</button>
+        <button type="button" class='button' id="clear">clear</button>
+    </div>
+    <script type="text/javascript">
+        var container = document.getElementById("container");
+        var resultBtn = document.getElementById("result");
+        var clearBtn = document.getElementById("clear");
+        var confirmBtn = document.getElementById("confirm");
+        var yearInput = document.getElementById("year");
+        var info = document.getElementById("info");
+        var results = [];
+        var item;
+        var currentYear = 2021;
+        var yearMonth = [];
+        var startDay;
+        function createUI(days) {
+            results = [];
+
+            container.innerHTML = '';
+            var date = new Date(currentYear, 0, 1);
+            console.log(date);
+            startDay = date.getDay();
+            console.log(`${currentYear}年的第一天是这星期的第${startDay}天`);
+            info.innerHTML = `${currentYear}-01-01`;
+            for (var i = 0; i < days + startDay; i++) {
+                item = document.createElement("div");
+                item.className = "item";
+                item.id = i;
+                container.appendChild(item);
+                if (i < startDay) {
+                    item.style.visibility = 'hidden';
+                }
+                item.addEventListener("click", function(event) {
+                    // console.log(event);
+                    var intId = parseInt(event.target.id);
+                    var ind = results.indexOf(intId);
+                    if (ind > -1) {
+                        event.target.style.backgroundColor = 'rgb(235, 237, 240)';
+                        results.splice(ind, 1);
+                    } else {
+                        event.target.style.backgroundColor = 'rgb(155, 233, 168)';
+                        results.push(intId);
+        
+                    }
+                });
+                item.addEventListener('mouseover', function(event) {
+                    // var id = event.target.id;
+                    // console.log('id:', id);
+
+                    var r = computeYearMouthDay(parseInt(event.target.id));
+                        // console.log(`这是::${currentYear}-${m.toString().padStart(2, '0')}-${d.toString().padStart(2, '0')}`);
+                    info.innerHTML = r[3];
+                });
+
+                if (item.id > 111 && item.id < 300) {
+                    item.style.backgroundColor = 'rgb(155, 233, 168)';
+                    results.push(i);
+                }
+            }
+        }
+
+
+        resultBtn.onclick = function() {
+            console.log(results);
+            resultsStr = [];
+            results.sort().forEach(function(item) {
+                var itemStr = computeYearMouthDay(item);
+                resultsStr.push(itemStr[3]);
+            });
+            console.log(resultsStr);
+        }
+
+        clearBtn.onclick = function() {
+            
+            for (var i = 0; i < container.children.length; i++) {
+                container.children[i].style.backgroundColor = 'rgb(235, 237, 240)';
+                results = [];
+            }
+        }
+
+        confirmBtn.onclick = function() {
+            currentYear = yearInput.value;
+            start();
+        }
+
+        function start() {
+            var days = getYearDays(currentYear);
+            console.log(`${currentYear}年一共有${days}天`);
+            createUI(days);
+        }
+
+        function getYearDays(year) {
+            var date;
+            var s = 0;
+            if (!year) {
+                year = new Date().getFullYear();
+            }
+            yearMonth = [];
+            for (var i = 1; i < 13; i++) {
+                date = new Date(year, i, 0);
+                s += date.getDate();
+                yearMonth.push(s);
+            }
+            return s;
+        }
+
+        function computeYearMouthDay(index) {
+            var i = index - startDay + 1;
+            var m = 1;
+            var d = 0;
+            for (var j = 0; j < yearMonth.length; j++) {
+                m = j + 1;
+                if (i <= yearMonth[j]) {
+                    if (j === 0) {
+                        d = i;
+                    } else {
+                        d = i - yearMonth[j - 1];
+                    }
+                    break;
+                }
+            }
+            return [currentYear, m, d, `${currentYear}-${m.toString().padStart(2, '0')}-${d.toString().padStart(2, '0')}`];
+        }
+
+        start();
+        console.log(yearMonth);
+        
+    </script>
+</body>
+</html>
